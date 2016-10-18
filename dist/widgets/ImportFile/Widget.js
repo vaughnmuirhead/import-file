@@ -125,7 +125,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base
     onExecuteComplete: function onExecuteComplete(results) {
       this._hideLoading();
       console.log("OnExecuteComplete");
-
+      debugger;
       //show messages if there are warning or error
       var msgs;
       if (results.messages && results.messages.length > 0) {
@@ -447,10 +447,8 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base
       /*
       LayerInfos.getInstance(this.map, this.map.itemInfo)
               .then(lang.hitch(this, function(layerInfos){
-                
-                
-                layerInfos.addFeatureCollection(layers, Results.Name);
-              }), lang.hitch(this, function(err){            
+                  layerInfos.addFeatureCollection(layers, Results.Name);
+              }), lang.hitch(this, function(err){
                 console.error("Can not get LayerInfos instance", err);
               }));
         */

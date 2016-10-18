@@ -36,7 +36,7 @@ define([
   'esri/request',
   'esri/geometry/Extent',
   'esri/graphicsUtils',
-  'esri/layers/layer',  
+  'esri/layers/layer',
   'esri/renderers/SimpleRenderer',
   'esri/symbols/SimpleMarkerSymbol',
   'esri/symbols/SimpleLineSymbol',
@@ -140,10 +140,10 @@ function(declare, lang, array, html, on, Deferred, all,
       this._clearLastResult();
       this._getInputParamValues().then(lang.hitch(this, function(inputValues){
         this._showLoading();
-        
+
         html.addClass(this.exeNode, 'jimu-state-disabled');
-		console.log("Input values:");
-		console.log(inputValues);
+		    console.log("Input values:");
+		    console.log(inputValues);
         if(this.config.isSynchronous){
           this.gp.execute(inputValues);
         }else{
@@ -162,7 +162,7 @@ function(declare, lang, array, html, on, Deferred, all,
     onExecuteComplete: function(results){
       this._hideLoading();
         console.log("OnExecuteComplete")
-
+debugger;
       //show messages if there are warning or error
       var msgs;
       if(results.messages && results.messages.length > 0){
@@ -213,7 +213,7 @@ function(declare, lang, array, html, on, Deferred, all,
             this.gp.getResultData(jobInfo.jobInfo.jobId, param.name);
           }
         }, this);
-      }else{		 
+      }else{
         array.forEach(this.config.outputParams, function(param){
           this.gp.getResultData(jobInfo.jobInfo.jobId, param.name)
         }, this);
@@ -398,7 +398,7 @@ function(declare, lang, array, html, on, Deferred, all,
         }, ulNode);
       }));
     },
-	
+
 	// ==========================================
 	// ImportFile changes
 	// ==========================================
@@ -408,13 +408,13 @@ function(declare, lang, array, html, on, Deferred, all,
 		pointmarker.setSize(10);
 		pointmarker.setColor(new Color([255, 0, 0, 1]));
 		var Point_Renderer = new esri.renderer.SimpleRenderer(pointmarker);
-		
+
 		var linemarker = new SimpleLineSymbol();
 		linemarker.setWidth(2);
 		linemarker.setColor(new Color([230, 0, 0, 1]));
 		var Line_Renderer = new esri.renderer.SimpleRenderer(linemarker);
-		
-		
+
+
 		var line = new SimpleLineSymbol();
 		line.setWidth(1.5);
 		line.setColor(new Color([168, 0, 0, 1]));
@@ -422,29 +422,29 @@ function(declare, lang, array, html, on, Deferred, all,
 		fill.setColor(new Color([230, 0, 0, 0.49]));
 		fill.setOutline(line);
 		var Polygon_Renderer = new esri.renderer.SimpleRenderer(fill);
-		
+
 		if (Geometry === "esriGeometryPolygon")
 		{
 			return Polygon_Renderer;
 		}
-		
+
 		if (Geometry === "esriGeometryPolyline")
 		{
 			return Line_Renderer;
 		}
-		
+
 		if (Geometry === "esriGeometryPoint")
 		{
 			return Point_Renderer;
 		}
-		
+
 		if (Geometry === "esriGeometryMultiPatch")
 		{
 			return Polygon_Renderer;
 		}
-  
+
 	},
-	
+
 	GeneratePopupTemplate: function(InputFeatureSet){
 		var FieldInfos = [];
 		var i = 0;
@@ -457,32 +457,32 @@ function(declare, lang, array, html, on, Deferred, all,
                 label: InputFeatureSet.fields[i].alias
               });
 		  }
-		
+
     var popupTemplate = new esri.dijit.PopupTemplate({
             title: InputFeatureSet.displayFieldName,
             fieldInfos: FieldInfos,
             showAttachments: false
           });
 		  //console.log(popupTemplate);
-		  		   
+
         return popupTemplate;
     },
 
-	
-	ProcessResults: function(Results){        
+
+	ProcessResults: function(Results){
 		console.log(Results.Name);
-		
+
 		//var GroupLayer = new esri.layers.Layer();
         //GroupLayer.layerId = Results.Name;
         //GroupLayer.id = Results.Name;
 		//this.map.addLayer(GroupLayer);
 		//console.log("GroupLayerID : "+GroupLayer.id);
-		
-		
 
-		
+
+
+
 		var layers = [];
-		
+
 		console.log("Items found : "+Results.Layers.length);
 		var i = 0;
 		for (i = 0; i < Results.Layers.length; i++)
@@ -494,35 +494,35 @@ function(declare, lang, array, html, on, Deferred, all,
 		/*
 		LayerInfos.getInstance(this.map, this.map.itemInfo)
           .then(lang.hitch(this, function(layerInfos){
-            
-            
+
+
             layerInfos.addFeatureCollection(layers, Results.Name);
-          }), lang.hitch(this, function(err){            
+          }), lang.hitch(this, function(err){
             console.error("Can not get LayerInfos instance", err);
           }));
 		  */
 	},
-	
+
     // Add the feature layer to the map for each bench height
-    AddFeatureSetAsLayer: function(FeatureSet, Name){        
+    AddFeatureSetAsLayer: function(FeatureSet, Name){
 
 	console.log("Adding Feature set: "+Name);
 	console.log("Feature Set : "+FeatureSet)
-	
+
      var PopupTemplate = this.GeneratePopupTemplate(FeatureSet);
 
         var layerDefinition =	{
 								"geometryType": FeatureSet.geometryType,
 								"fields": FeatureSet.fields
-								} 
+								}
   //console.log(layerDefinition);
-  
+
         //benchLayerInfo = this.Get_MinePlan_Bench_LayerDefinition(Name);
-        var FeatureSetCollection = {      
+        var FeatureSetCollection = {
             layerDefinition: layerDefinition,
             featureSet: FeatureSet
             };
-			
+
 			//var featureSet = new FeatureSet();
 			//featureSet.features = FeatureSet.features;
 
@@ -532,11 +532,11 @@ function(declare, lang, array, html, on, Deferred, all,
 		FeatureLayer.renderer = this.GetRenderer(FeatureSet.geometryType);
 		FeatureLayer.infoTemplate = PopupTemplate;
 		//FeatureLayer.parentLayerId = GroupLayer.id;
-		
+
 		//console.log(GroupLayer.id);
 		//console.log(GroupLayer.layerId);
-		
-        
+
+
         //pause drawing
         //FeatureLayer.suspend();
         //FeatureLayer.infoTemplate = this.SetPopUp();
@@ -559,15 +559,15 @@ function(declare, lang, array, html, on, Deferred, all,
 		  console.log(valueObj);
 		  // *** ImportFile Changes ***
           if (valueObj.paramName === "Message")
-              {                 
-                 console.log("Message : "+valueObj.value.Name);			 
-                 ImportSuccessful = valueObj.value === "File imported successfully.";                                 
+              {
+                 console.log("Message : "+valueObj.value.Name);
+                 ImportSuccessful = valueObj.value === "File imported successfully.";
               }
-		  
+
       }));
-        
+
         console.log("ImportSuccessful"+ImportSuccessful)
-        
+
       array.forEach(values, lang.hitch(this, function(valueObj){
 		  console.log(valueObj);
 		  // *** ImportFile Changes ***
@@ -577,14 +577,14 @@ function(declare, lang, array, html, on, Deferred, all,
                   {
                       if (valueObj.dataType === "GPString")
                       {
-                         console.log(valueObj.value.Name);			 
+                         console.log(valueObj.value.Name);
                          this.ProcessResults(valueObj.value);
                       }
                   }
               }
 		  // ***
-		  
-		  
+
+
         if(valueObj.dataType === "GPFeatureRecordSetLayer"){
           var features = valueObj.value && valueObj.value.features;
           if(features && features.length > 0){
