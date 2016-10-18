@@ -15,9 +15,7 @@ def main():
 
   arcpy.env.overwriteOutput = True
 
-  #target_fc = "IO_SDI_PUBLISH_TST.GCC.SurveyAOI"
-  #target = r"\\entper-fil01\AppsData\IOAGS_config\AGS_Test\ConnectionFiles\PUBLISH\GIS_EDIT@IO_SDI_PUBLISH_TST@IORPER-GSDT01.sde\{0}".format(target_fc)
-  #"\\entper-fil01\AppsData\IOAGS_config\AGS_Test\ConnectionFiles\PUBLISH\GIS_EDIT@IO_SDI_PUBLISH_TST@IORPER-GSDT01.sde\IO_SDI_PUBLISH_TST.GCC.SurveyAOI"
+  #Example target input value for saving data to SDE feature class: "\\entper-fil01\AppsData\IOAGS_config\AGS_Test\ConnectionFiles\PUBLISH\GIS_EDIT@IO_SDI_PUBLISH_TST@IORPER-GSDT01.sde\IO_SDI_PUBLISH_TST.GCC.SurveyAOI"
 
   Log("Input File : " + InputFile)
 
