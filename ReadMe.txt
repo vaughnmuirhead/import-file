@@ -14,7 +14,7 @@ Dependencies
 
 Deployment
 1.	Using ArcGIS Desktop, run the ImportFile tool with a sample file (CSV, ZIP, DXF)
-2.	Publish the results as a Geoprocessing service in ArcGIS Server
+2.	Publish the results as a Geoprocessing service in ArcGIS Server (ensure you choose Synchronous as the execution mode!)
 3.	Check the Uploads checkbox to allow file uploads to the GP tool.
 4.	Set the permissions of the GP service in ArcGIS Server. 
 5.	Deploy the custom widget "ImportFile" to WAB by copying it into the <wabfolder>\client\stemapp\widgets\
