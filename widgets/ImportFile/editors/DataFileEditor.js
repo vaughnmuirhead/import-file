@@ -57,11 +57,12 @@ define(['dojo/_base/declare',
     postCreate: function(){
       this.inherited(arguments);
 
-    // Avoid CORS errors.  Also disable the proxy in this application's config.json file.    
-      esri.config.defaults.io.corsEnabledServers.push(this.config.serverInfo.url);    
+    // Avoid CORS errors.  Also disable the proxy in this application's config.json file.
+      esri.config.defaults.io.corsEnabledServers.push(this.config.serverInfo.url);
       if(this.value){
         this.parseDefaultValue();
       }
+
 
       //set url text input properties
       domAttr.set(this.urlEditor, 'tooltip', this.param.tooltip);
@@ -189,7 +190,7 @@ define(['dojo/_base/declare',
           if(data.success){
             this.itemIDInput = data.item.itemID;
             domAttr.set(this.fileInput, 'value', '');
-            domAttr.set(this.uploadFileName, 'innerHTML', fileName);			
+            domAttr.set(this.uploadFileName, 'innerHTML', fileName);
             new Message({message:this.nls.uploadSuccess});
           }
         }), lang.hitch(this, function(error){

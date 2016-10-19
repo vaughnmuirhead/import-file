@@ -15,7 +15,7 @@ def main():
 
   arcpy.env.overwriteOutput = True
 
-  #Example target input value for saving data to SDE feature class: "\\entper-fil01\AppsData\IOAGS_config\AGS_Test\ConnectionFiles\PUBLISH\GIS_EDIT@IO_SDI_PUBLISH_TST@IORPER-GSDT01.sde\IO_SDI_PUBLISH_TST.GCC.SurveyAOI"
+  # Example target input value for saving data to SDE feature class: "\\entper-fil01\AppsData\IOAGS_config\AGS_Test\ConnectionFiles\PUBLISH\GIS_EDIT@IO_SDI_PUBLISH_TST@IORPER-GSDT01.sde\IO_SDI_PUBLISH_TST.GCC.SurveyAOI"
 
   Log("Input File : " + InputFile)
 
@@ -42,18 +42,28 @@ def main():
       if len(FileList) == 0:
         raise arcpy.ExecuteError("No files found to process in ZIP archive.  Expecting SHP or DXF file.")
 
+      file_data = {}
       for File in FileList:
         FileExtension = os.path.basename(File).split('.')[-1].lower()
+        if FileExtension == "dxf" or FileExtension == "shp":
+          file_data['type'] = FileExtension
+          file_data['file'] = File
+        elif FileExtension == "prj":
+          file_data['prj'] = File
 
-        if FileExtension == "dxf":
-          Results = ImportDXF(File, InputSpatialReference)
-          break
-        elif FileExtension == "shp":
-          if(target):
-            save_to_target(File, InputSpatialReference, target)
 
-          Results = ImportShapeFile(File, InputSpatialReference, target)
-          break
+      if file_data['type'] == "dxf":
+        Results = ImportDXF(file_data['file'], InputSpatialReference)
+
+      elif file_data['type'] == "shp":
+        if (target):
+          out_sr = 4283
+          fc = projectToNewSystem(file_data, out_sr)
+          save_to_target(fc, target)
+
+        #Results = ImportShapeFile(file_data['file'], InputSpatialReference, target)
+        out_sr = 3857
+        Results = [projectToNewSystem(file_data, out_sr)]
 
     elif uploadedExt == "csv":
       Results = ImportCSV(InputFile, InputSpatialReference)
@@ -108,6 +118,8 @@ def GetZIPFileList(ZIPFile):
     if ext == 'dxf':
       FileList.append(os.path.join(extractDir, f))
     elif ext == 'shp':
+      FileList.append(os.path.join(extractDir, f))
+    elif ext == 'prj':
       FileList.append(os.path.join(extractDir, f))
 
   return FileList
@@ -187,7 +199,7 @@ def ImportDXF(DXFFile, DXFSpatialReference):
   return GetDatasetFeatureClasses(ProjectedDataset)
 
 
-def ImportShapeFile(SHPFile, SHPSpatialReference, target):
+def ImportShapeFile(SHPFile, SHPSpatialReference):
   Log("Processing Shapefile...")
   ConvertedShapefile = arcpy.CreateUniqueName("ConvertedShapeFile", arcpy.env.scratchGDB)
 
@@ -196,10 +208,12 @@ def ImportShapeFile(SHPFile, SHPSpatialReference, target):
 
   return [projectToWebMercator(ConvertedShapefile, arcpy.env.scratchGDB, SHPSpatialReference)]
 
-def save_to_target(SHPFile, SHPSpatialReference, target):
+
+def save_to_target(in_fc, target):
   Log("Appending Shapefile...")
-  arcpy.Append_management([SHPFile], target, "NO_TEST")
+  arcpy.Append_management([in_fc], target, "NO_TEST")
   Log("Appending Shapefile success.")
+
 
 def projectToWebMercator(in_fc, tempWorkspace, sr):
   WGSAuxSphere = arcpy.SpatialReference(3857)  # web Mercator aux sphere
@@ -207,6 +221,18 @@ def projectToWebMercator(in_fc, tempWorkspace, sr):
 
   Log("Reprojecting from {0} to {1}...".format(sr.name, WGSAuxSphere.name))
   arcpy.Project_management(in_fc, out_fc, WGSAuxSphere, in_coor_system=sr)
+  return out_fc
+
+def projectToNewSystem(file_data, out_sr):
+
+  sr = arcpy.SpatialReference(file_data['prj'])
+  out_sr_obj = arcpy.SpatialReference(out_sr)
+  out_fc = arcpy.CreateUniqueName("ReprojectedTemp", arcpy.env.scratchGDB)
+  if sr.name == out_sr_obj.name:
+    return file_data["file"] #Don't reproject if not necessary.
+
+  Log("Reprojecting from {0} to {1}...".format(sr.name, out_sr_obj.name))
+  arcpy.Project_management(file_data['file'], out_fc, out_sr_obj, in_coor_system=sr)
   return out_fc
 
 
