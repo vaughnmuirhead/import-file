@@ -136,6 +136,13 @@ function(declare, lang, array, html, on, Deferred, all,
       }
     },
 
+    refreshMapLayers: function(){
+      var mapLayers = this.map.getLayersVisibleAtScale();
+      array.forEach(mapLayers, function(layer){
+        layer.refresh();
+      });
+    },
+
     executeGP: function(){
       this._clearLastResult();
       this._getInputParamValues().then(lang.hitch(this, function(inputValues){
@@ -162,7 +169,9 @@ function(declare, lang, array, html, on, Deferred, all,
     onExecuteComplete: function(results){
       this._hideLoading();
         console.log("OnExecuteComplete")
-debugger;
+
+      this.refreshMapLayers(); //refresh map layers to display any newly appended geometry.
+
       //show messages if there are warning or error
       var msgs;
       if(results.messages && results.messages.length > 0){
@@ -174,6 +183,7 @@ debugger;
           this._createErrorMessages(msgs);
         }
       }
+
 
       //the results.results is an array of ParameterValue,
       //because it contains one or more parameters
@@ -472,15 +482,6 @@ debugger;
 	ProcessResults: function(Results){
 		console.log(Results.Name);
 
-		//var GroupLayer = new esri.layers.Layer();
-        //GroupLayer.layerId = Results.Name;
-        //GroupLayer.id = Results.Name;
-		//this.map.addLayer(GroupLayer);
-		//console.log("GroupLayerID : "+GroupLayer.id);
-
-
-
-
 		var layers = [];
 
 		console.log("Items found : "+Results.Layers.length);
@@ -491,16 +492,6 @@ debugger;
 			var NewLayer = this.AddFeatureSetAsLayer(FeatureSet, Results.Name+" - "+Results.Layers[i].Name);
 			//layers.push(NewLayer);
 		}
-		/*
-		LayerInfos.getInstance(this.map, this.map.itemInfo)
-          .then(lang.hitch(this, function(layerInfos){
-
-
-            layerInfos.addFeatureCollection(layers, Results.Name);
-          }), lang.hitch(this, function(err){
-            console.error("Can not get LayerInfos instance", err);
-          }));
-		  */
 	},
 
     // Add the feature layer to the map for each bench height
@@ -515,7 +506,6 @@ debugger;
 								"geometryType": FeatureSet.geometryType,
 								"fields": FeatureSet.fields
 								}
-  //console.log(layerDefinition);
 
         //benchLayerInfo = this.Get_MinePlan_Bench_LayerDefinition(Name);
         var FeatureSetCollection = {

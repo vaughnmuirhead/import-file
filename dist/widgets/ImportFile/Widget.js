@@ -99,6 +99,13 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base
       }
     },
 
+    refreshMapLayers: function refreshMapLayers() {
+      var mapLayers = this.map.getLayersVisibleAtScale();
+      array.forEach(mapLayers, function (layer) {
+        layer.refresh();
+      });
+    },
+
     executeGP: function executeGP() {
       this._clearLastResult();
       this._getInputParamValues().then(lang.hitch(this, function (inputValues) {
@@ -125,7 +132,9 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base
     onExecuteComplete: function onExecuteComplete(results) {
       this._hideLoading();
       console.log("OnExecuteComplete");
-      debugger;
+
+      this.refreshMapLayers(); //refresh map layers to display any newly appended geometry.
+
       //show messages if there are warning or error
       var msgs;
       if (results.messages && results.messages.length > 0) {
@@ -428,13 +437,6 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base
     ProcessResults: function ProcessResults(Results) {
       console.log(Results.Name);
 
-      //var GroupLayer = new esri.layers.Layer();
-      //GroupLayer.layerId = Results.Name;
-      //GroupLayer.id = Results.Name;
-      //this.map.addLayer(GroupLayer);
-      //console.log("GroupLayerID : "+GroupLayer.id);
-
-
       var layers = [];
 
       console.log("Items found : " + Results.Layers.length);
@@ -444,14 +446,6 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base
         var NewLayer = this.AddFeatureSetAsLayer(FeatureSet, Results.Name + " - " + Results.Layers[i].Name);
         //layers.push(NewLayer);
       }
-      /*
-      LayerInfos.getInstance(this.map, this.map.itemInfo)
-              .then(lang.hitch(this, function(layerInfos){
-                  layerInfos.addFeatureCollection(layers, Results.Name);
-              }), lang.hitch(this, function(err){
-                console.error("Can not get LayerInfos instance", err);
-              }));
-        */
     },
 
     // Add the feature layer to the map for each bench height
@@ -466,7 +460,6 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/_base/array', 'dojo/_base
         "geometryType": FeatureSet.geometryType,
         "fields": FeatureSet.fields
       };
-      //console.log(layerDefinition);
 
       //benchLayerInfo = this.Get_MinePlan_Bench_LayerDefinition(Name);
       var FeatureSetCollection = {
