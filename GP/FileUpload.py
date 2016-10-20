@@ -58,20 +58,18 @@ def main():
 
       elif file_data['type'] == "shp":
         if (target):
-          #out_sr = arcpy.SpatialReference(4283)
-          #fc = autoProject(file_data['file'], out_sr)
           fc = file_data['file']
           save_to_target(fc, target)
 
         #Results = ImportShapeFile(file_data['file'], InputSpatialReference, target)
-        out_sr = arcpy.SpatialReference(3857)
+        out_sr = arcpy.SpatialReference(3857) #get sr for web mercator
         Results = [autoProject(file_data['file'], out_sr)]
 
     elif uploadedExt == "csv":
       Results = ImportCSV(InputFile, InputSpatialReference)
 
     elif uploadedExt == "dxf":
-      Results = ImportDXF(InputFile, InputSpatialReference)
+      Results = ImportDXF(InputFile, InputSpatialReference, target)
 
     Log("Items to process : {0}".format(str(len(Results))))
 
@@ -188,16 +186,25 @@ def GetDatasetFeatureClasses(Dataset):
   return ResultList
 
 
-def ImportDXF(DXFFile, DXFSpatialReference):
+def ImportDXF(DXFFile, DXFSpatialReference, target=None):
   Log("Processing DXF File...")
   output_dataset = arcpy.CreateUniqueName("ConvertedDXF", arcpy.env.scratchGDB)
 
   arcpy.CADToGeodatabase_conversion(DXFFile, arcpy.env.scratchGDB, os.path.basename(output_dataset),
                                     DXFSpatialReference.scaleFactor, DXFSpatialReference)
 
-  ProjectedDataset = projectToWebMercator(output_dataset, arcpy.env.scratchGDB, DXFSpatialReference)
+  #ProjectedDataset = projectToWebMercator(output_dataset, arcpy.env.scratchGDB, DXFSpatialReference)
 
-  return GetDatasetFeatureClasses(ProjectedDataset)
+  out_sr = arcpy.SpatialReference(3857) #3857 webmercator for display on web map.
+  ProjectedDataset = autoProject(output_dataset, out_sr)
+
+  feature_classes = GetDatasetFeatureClasses(ProjectedDataset)
+
+  if(target):
+    for fc in feature_classes:
+      save_to_target(fc, target)
+
+  return feature_classes
 
 
 # def ImportShapeFile(SHPFile, SHPSpatialReference):
