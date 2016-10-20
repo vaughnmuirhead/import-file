@@ -21,6 +21,7 @@ def main():
 
   if not userSpecifiedProjection or userSpecifiedProjection == None:
     userSpecifiedProjection = "WGS84"
+
   Log("Input Projection : " + userSpecifiedProjection)
   InputSpatialReference = RetrieveSpatialReference(userSpecifiedProjection)
 
@@ -57,13 +58,14 @@ def main():
 
       elif file_data['type'] == "shp":
         if (target):
-          out_sr = 4283
-          fc = projectToNewSystem(file_data, out_sr)
+          #out_sr = arcpy.SpatialReference(4283)
+          #fc = autoProject(file_data['file'], out_sr)
+          fc = file_data['file']
           save_to_target(fc, target)
 
         #Results = ImportShapeFile(file_data['file'], InputSpatialReference, target)
-        out_sr = 3857
-        Results = [projectToNewSystem(file_data, out_sr)]
+        out_sr = arcpy.SpatialReference(3857)
+        Results = [autoProject(file_data['file'], out_sr)]
 
     elif uploadedExt == "csv":
       Results = ImportCSV(InputFile, InputSpatialReference)
@@ -187,7 +189,6 @@ def GetDatasetFeatureClasses(Dataset):
 
 
 def ImportDXF(DXFFile, DXFSpatialReference):
-  ResultList = []
   Log("Processing DXF File...")
   output_dataset = arcpy.CreateUniqueName("ConvertedDXF", arcpy.env.scratchGDB)
 
@@ -199,20 +200,22 @@ def ImportDXF(DXFFile, DXFSpatialReference):
   return GetDatasetFeatureClasses(ProjectedDataset)
 
 
-def ImportShapeFile(SHPFile, SHPSpatialReference):
-  Log("Processing Shapefile...")
-  ConvertedShapefile = arcpy.CreateUniqueName("ConvertedShapeFile", arcpy.env.scratchGDB)
-
-  arcpy.FeatureClassToFeatureClass_conversion(SHPFile, arcpy.env.scratchGDB, os.path.basename(ConvertedShapefile))
-  arcpy.DefineProjection_management(ConvertedShapefile, SHPSpatialReference)
-
-  return [projectToWebMercator(ConvertedShapefile, arcpy.env.scratchGDB, SHPSpatialReference)]
+# def ImportShapeFile(SHPFile, SHPSpatialReference):
+#   Log("Processing Shapefile...")
+#   ConvertedShapefile = arcpy.CreateUniqueName("ConvertedShapeFile", arcpy.env.scratchGDB)
+#
+#   arcpy.FeatureClassToFeatureClass_conversion(SHPFile, arcpy.env.scratchGDB, os.path.basename(ConvertedShapefile))
+#   arcpy.DefineProjection_management(ConvertedShapefile, SHPSpatialReference)
+#
+#   return [projectToWebMercator(ConvertedShapefile, arcpy.env.scratchGDB, SHPSpatialReference)]
 
 
 def save_to_target(in_fc, target):
-  Log("Appending Shapefile...")
-  arcpy.Append_management([in_fc], target, "NO_TEST")
-  Log("Appending Shapefile success.")
+  Log("Appending input...")
+  out_sr = arcpy.Describe(target).spatialReference
+  in_fc_reproject = autoProject(in_fc, out_sr)
+  arcpy.Append_management([in_fc_reproject], target, "NO_TEST")
+  Log("Input appended successfully.")
 
 
 def projectToWebMercator(in_fc, tempWorkspace, sr):
@@ -223,16 +226,19 @@ def projectToWebMercator(in_fc, tempWorkspace, sr):
   arcpy.Project_management(in_fc, out_fc, WGSAuxSphere, in_coor_system=sr)
   return out_fc
 
-def projectToNewSystem(file_data, out_sr):
 
-  sr = arcpy.SpatialReference(file_data['prj'])
-  out_sr_obj = arcpy.SpatialReference(out_sr)
+def autoProject(in_fc, out_sr):
+
+  #accepts input feature class and output spatial reference object and reprojects.
+
+  in_sr = arcpy.Describe(in_fc).spatialReference
   out_fc = arcpy.CreateUniqueName("ReprojectedTemp", arcpy.env.scratchGDB)
-  if sr.name == out_sr_obj.name:
-    return file_data["file"] #Don't reproject if not necessary.
+  if in_sr.name == out_sr.name:
+    Log("Input is has the same spatial reference as target.")
+    return in_fc #Don't reproject if not necessary.
 
-  Log("Reprojecting from {0} to {1}...".format(sr.name, out_sr_obj.name))
-  arcpy.Project_management(file_data['file'], out_fc, out_sr_obj, in_coor_system=sr)
+  Log("Reprojecting from {0} to {1}...".format(in_sr.name, out_sr.name))
+  arcpy.Project_management(in_fc, out_fc, out_sr, in_coor_system=in_sr)
   return out_fc
 
 
