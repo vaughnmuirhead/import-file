@@ -167,8 +167,9 @@ function(declare, lang, array, html, on, Deferred, all,
     },
 
     onExecuteComplete: function(results){
+      debugger;
       this._hideLoading();
-        console.log("OnExecuteComplete")
+      console.log("OnExecuteComplete")
 
       this.refreshMapLayers(); //refresh map layers to display any newly appended geometry.
 

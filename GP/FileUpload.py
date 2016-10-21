@@ -89,15 +89,15 @@ def main():
 
     ResultsJSON = json.dumps(ResultsArray)
 
-    arcpy.SetParameterAsText(2, ResultsJSON)
-    arcpy.SetParameterAsText(3, "File imported successfully.")
+    arcpy.SetParameterAsText(3, ResultsJSON)
+    arcpy.SetParameterAsText(4, "File imported successfully.")
 
   except Exception, e:
     Log("Error with conversion: " + traceback.format_exc())
     ResultsArray["Layers"].append({"Name": "Conversion Error", "FeatureSet": ""})
     ResultsJSON = json.dumps(ResultsArray)
-    arcpy.SetParameterAsText(2, ResultsJSON)
-    arcpy.SetParameterAsText(3, traceback.format_exc())
+    arcpy.SetParameterAsText(3, ResultsJSON)
+    arcpy.SetParameterAsText(4, traceback.format_exc())
     raise arcpy.ExecuteError(traceback.format_exc())
 
 
