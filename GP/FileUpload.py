@@ -46,24 +46,18 @@ def main():
       file_data = {}
       for File in FileList:
         FileExtension = os.path.basename(File).split('.')[-1].lower()
-        if FileExtension == "dxf" or FileExtension == "shp":
+        if FileExtension == "shp":
           file_data['type'] = FileExtension
           file_data['file'] = File
         elif FileExtension == "prj":
           file_data['prj'] = File
 
 
-      if file_data['type'] == "dxf":
-        Results = ImportDXF(file_data['file'], InputSpatialReference)
+      # if file_data['type'] == "dxf":
+      #   Results = ImportDXF(file_data['file'], InputSpatialReference)
 
-      elif file_data['type'] == "shp":
-        if (target):
-          fc = file_data['file']
-          save_to_target(fc, target)
-
-        #Results = ImportShapeFile(file_data['file'], InputSpatialReference, target)
-        out_sr = arcpy.SpatialReference(3857) #get sr for web mercator
-        Results = [autoProject(file_data['file'], out_sr)]
+      if file_data['type'] == "shp":
+        Results = [ImportShapeFile(file_data, target)]
 
     elif uploadedExt == "csv":
       Results = ImportCSV(InputFile, InputSpatialReference)
@@ -207,14 +201,15 @@ def ImportDXF(DXFFile, DXFSpatialReference, target=None):
   return feature_classes
 
 
-# def ImportShapeFile(SHPFile, SHPSpatialReference):
-#   Log("Processing Shapefile...")
-#   ConvertedShapefile = arcpy.CreateUniqueName("ConvertedShapeFile", arcpy.env.scratchGDB)
-#
-#   arcpy.FeatureClassToFeatureClass_conversion(SHPFile, arcpy.env.scratchGDB, os.path.basename(ConvertedShapefile))
-#   arcpy.DefineProjection_management(ConvertedShapefile, SHPSpatialReference)
-#
-#   return [projectToWebMercator(ConvertedShapefile, arcpy.env.scratchGDB, SHPSpatialReference)]
+def ImportShapeFile(file_data, target=None):
+  Log("Processing Shapefile...")
+
+  if (target):
+    fc = file_data['file']
+    save_to_target(fc, target)
+
+  out_sr = arcpy.SpatialReference(3857)  # get sr for web mercator
+  return autoProject(file_data['file'], out_sr)
 
 
 def save_to_target(in_fc, target):
