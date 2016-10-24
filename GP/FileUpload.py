@@ -73,7 +73,7 @@ def main():
         FeatureSet.load(FeatureClass)
         Desc = arcpy.Describe(FeatureClass)
         Name = Desc.shapeType
-        ResultsArray["Layers"].append({"Name": Name, "FeatureSet": FeatureSet.JSON})
+        ResultsArray["Layers"].append({"Name": Name, "FeatureSet": FeatureSet.JSON, "Extent": Desc.extent.JSON})
 
       Log("Conversion complete.")
 

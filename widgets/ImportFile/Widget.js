@@ -167,7 +167,6 @@ function(declare, lang, array, html, on, Deferred, all,
     },
 
     onExecuteComplete: function(results){
-      debugger;
       this._hideLoading();
       console.log("OnExecuteComplete")
 
@@ -486,15 +485,22 @@ function(declare, lang, array, html, on, Deferred, all,
 		var layers = [];
 
 		console.log("Items found : "+Results.Layers.length);
+    var zoomExtent;
+
 		var i = 0;
 		for (i = 0; i < Results.Layers.length; i++)
 		{
 			var FeatureSet = JSON.parse(Results.Layers[i].FeatureSet);
 			var NewLayer = this.AddFeatureSetAsLayer(FeatureSet, Results.Name+" - "+Results.Layers[i].Name);
+      if(zoomExtent){
+        zoomExtent.union(new esri.geometry.Extent(JSON.parse(Results.Layers[i].Extent)));
+      } else{
+       zoomExtent = new esri.geometry.Extent(JSON.parse(Results.Layers[i].Extent));
+      }
 			//layers.push(NewLayer);
 		}
+    this.map.setExtent(zoomExtent.expand(1.4));
 	},
-
     // Add the feature layer to the map for each bench height
     AddFeatureSetAsLayer: function(FeatureSet, Name){
 
@@ -583,6 +589,7 @@ function(declare, lang, array, html, on, Deferred, all,
           }
         }
       }));
+
       if(allFeatures.length > 0){
         try{
           var extent = graphicsUtils.graphicsExtent(allFeatures);
