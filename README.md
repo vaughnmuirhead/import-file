@@ -1,5 +1,5 @@
 # import-file
-A custom widget for ESRI's web appbuilder product that allows a user to import spatial data from a file.
+A custom widget for ESRI's web appbuilder product that allows a user to import spatial data from a file. Allows upload and immediate display on the map. User can optionally enter a ArcSDE target feature class which the uploaded data will be appended to.  
 
 ## Supported Upload types
 Currently supports upload of SHP(Zipped), CSV and DXF.
